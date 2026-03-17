@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: PaymentServiceTest
+  data:
+    mongodb:
+      auto-index-creation: true
+
+jwt:
+  secret: U2VjcmV0S2V5Rm9yVGVzdGluZ1B1cnBvc2VzT25seTEyMzQ1Njc4OTA=
+  expiration: 900000
+
+application:
+  random-api-url: http://localhost:${wiremock.server.port}
+
+  kafka:
+    topic:
+      payment-status: payment-status-topic
+
+logging:
+  level:
+    root: INFO
+    org.ashkelyonok: DEBUG
+    org.testcontainers: INFO
+    org.apache.kafka: WARN
