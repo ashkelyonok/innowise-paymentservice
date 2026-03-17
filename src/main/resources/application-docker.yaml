@@ -1,0 +1,9 @@
+spring:
+  config:
+    activate:
+      on-profile: docker
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@payment-db:27017/${MONGO_INITDB_DATABASE:payment_db}?authSource=admin
+  kafka:
+    bootstrap-servers: payment-kafka:29092

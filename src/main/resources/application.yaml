@@ -1,0 +1,58 @@
+server:
+  port: ${SERVER_PORT:8085}
+
+spring:
+  application:
+    name: PaymentService
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:local}
+
+  data:
+    mongodb:
+      uri: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@${MONGO_HOST:localhost}:${MONGO_PORT:27017}/${MONGO_INITDB_DATABASE:payment_db}?authSource=admin
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      acks: all
+
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
+
+application:
+  kafka:
+    consumer-group-id: payment-service-group
+    topic:
+      order-created: order-created-topic
+      payment-status: payment-status-topic
+
+jwt:
+  secret: ${JWT_SECRET}
+
+random:
+  api:
+    url: ${RANDOM_API_URL:https://www.random.org}
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      randomApi:
+        registerHealthIndicator: true
+        slidingWindowSize: 5
+        minimumNumberOfCalls: 3
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 50
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info

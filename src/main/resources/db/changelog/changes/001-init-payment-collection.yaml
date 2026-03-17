@@ -3,27 +3,21 @@ databaseChangeLog:
       id: 001-create-payments-collection
       author: ashkelyonok
       changes:
-        - mongoCreateCollection:
+        - createCollection:
             collectionName: payments
   - changeSet:
       id: 002-create-payments-indexes
       author: ashkelyonok
       changes:
-        - mongoCreateIndex:
+        - createIndex:
             collectionName: payments
-            indexName: idx_user_id
-            keys:
-              userId: 1
-        - mongoCreateIndex:
+            keys: "{ user_id: 1 }"
+            options: "{ name: 'idx_user_id' }"
+        - createIndex:
             collectionName: payments
-            indexName: idx_order_id
-            keys:
-              orderId: 1
-            options:
-              unique: true
-        - mongoCreateIndex:
+            keys: "{ order_id: 1 }"
+            options: "{ unique: true, name: 'idx_order_id' }"
+        - createIndex:
             collectionName: payments
-            indexName: idx_status_created_at
-            keys:
-              status: 1
-              createdAt: -1
+            keys: "{ status: 1, timestamp: -1 }"
+            options: "{ name: 'idx_status_timestamp' }"
