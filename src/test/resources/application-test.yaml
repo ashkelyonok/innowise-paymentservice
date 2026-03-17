@@ -10,8 +10,6 @@ jwt:
   expiration: 900000
 
 application:
-  random-api-url: http://localhost:${wiremock.server.port}
-
   kafka:
     topic:
       payment-status: payment-status-topic

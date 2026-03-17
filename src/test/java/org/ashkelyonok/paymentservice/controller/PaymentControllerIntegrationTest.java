@@ -52,6 +52,7 @@ class PaymentControllerIntegrationTest extends AbstractIntegrationTest {
     private KafkaTemplate<String, Object> kafkaTemplate;
 
     @MockitoBean
+    @SuppressWarnings("unused")
     private RandomApiClient randomApiClient;
 
     @AfterEach
