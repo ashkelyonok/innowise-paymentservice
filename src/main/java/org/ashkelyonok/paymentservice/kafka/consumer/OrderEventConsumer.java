@@ -22,23 +22,18 @@ public class OrderEventConsumer {
     public void consumeOrderCreatedEvent(OrderCreatedEvent event) {
         log.info("Received OrderCreatedEvent for Order ID: {}", event.getOrderId());
 
-        try {
-            PaymentCreateDto dto = PaymentCreateDto.builder()
-                    .orderId(event.getOrderId())
-                    .userId(event.getUserId())
-                    .paymentAmount(event.getTotalAmount())
-                    .build();
+        PaymentCreateDto dto = PaymentCreateDto.builder()
+                .orderId(event.getOrderId())
+                .userId(event.getUserId())
+                .paymentAmount(event.getTotalAmount())
+                .build();
 
-            boolean isInitialized = paymentService.initializePayment(dto);
+        boolean isInitialized = paymentService.initializePayment(dto);
 
-            if (isInitialized) {
-                log.info("Successfully initialized pending payment for Order ID: {}", event.getOrderId());
-            } else {
-                log.info("Ignored OrderCreatedEvent for Order ID: {} (Already exists)", event.getOrderId());
-            }
-
-        } catch (Exception e) {
-            log.error("Failed to process OrderCreatedEvent for Order ID: {}. Reason: {}", event.getOrderId(), e.getMessage());
+        if (isInitialized) {
+            log.info("Successfully initialized pending payment for Order ID: {}", event.getOrderId());
+        } else {
+            log.info("Ignored OrderCreatedEvent for Order ID: {} (Already exists)", event.getOrderId());
         }
     }
 }

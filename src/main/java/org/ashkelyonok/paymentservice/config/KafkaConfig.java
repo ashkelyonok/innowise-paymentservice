@@ -70,7 +70,7 @@ public class KafkaConfig {
         DefaultErrorHandler errorHandler = new DefaultErrorHandler(
                 (consumerRecord, exception) -> log.error("Kafka Error: Failed to process message on topic '{}'. Reason: {}",
                         consumerRecord.topic(), exception.getCause() != null ? exception.getCause().getMessage() : exception.getMessage()),
-                new FixedBackOff(0L, 0L));
+                new FixedBackOff(2000L, 3L));
 
         factory.setCommonErrorHandler(errorHandler);
         return factory;
