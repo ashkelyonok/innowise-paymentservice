@@ -40,6 +40,12 @@ public class GlobalExceptionHandler {
         return buildResponse(HttpStatus.SERVICE_UNAVAILABLE, "Service Unavailable", ex.getMessage(), request);
     }
 
+    @ExceptionHandler(KafkaPublishException.class)
+    public ResponseEntity<ErrorResponseDto> handleKafkaPublishException(KafkaPublishException ex, HttpServletRequest request) {
+        log.error("Failed to publish event to Kafka: {}", ex.getMessage(), ex);
+        return buildResponse(HttpStatus.INTERNAL_SERVER_ERROR, "Kafka Publishing Error", "Failed to publish payment event", request);
+    }
+
     @ExceptionHandler(LiquibaseMigrationException.class)
     public ResponseEntity<ErrorResponseDto> handleLiquibaseMigrationException(LiquibaseMigrationException ex, HttpServletRequest request) {
         log.error("Database migration error: {}", ex.getMessage(), ex);
