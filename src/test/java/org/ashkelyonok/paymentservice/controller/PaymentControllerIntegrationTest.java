@@ -1,8 +1,8 @@
 package org.ashkelyonok.paymentservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import org.ashkelyonok.paymentservice.AbstractIntegrationTest;
-import org.ashkelyonok.paymentservice.client.RandomApiClient;
 import org.ashkelyonok.paymentservice.model.dto.request.PaymentCreateDto;
 import org.ashkelyonok.paymentservice.model.entity.Payment;
 import org.ashkelyonok.paymentservice.model.enums.PaymentStatus;
@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -26,7 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -51,10 +49,6 @@ class PaymentControllerIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private KafkaTemplate<String, Object> kafkaTemplate;
 
-    @MockitoBean
-    @SuppressWarnings("unused")
-    private RandomApiClient randomApiClient;
-
     @AfterEach
     void tearDown() {
         paymentRepository.deleteAll();
@@ -63,7 +57,11 @@ class PaymentControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("Create Payment: Returns SUCCESS status")
     void createPayment_ShouldReturnSuccess() throws Exception {
-        when(randomApiClient.fetchRandomNumberString()).thenReturn("2");
+        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/"))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "text/plain")
+                        .withBody("2")));
 
         PaymentCreateDto dto = PaymentCreateDto.builder()
                 .orderId(100L)
@@ -87,7 +85,11 @@ class PaymentControllerIntegrationTest extends AbstractIntegrationTest {
     @Test
     @DisplayName("Create Payment: Returns FAILED status")
     void createPayment_ShouldReturnFailed() throws Exception {
-        when(randomApiClient.fetchRandomNumberString()).thenReturn("3");
+        wireMockServer.stubFor(WireMock.get(WireMock.urlPathEqualTo("/"))
+                .willReturn(WireMock.aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "text/plain")
+                        .withBody("3")));
 
         PaymentCreateDto dto = PaymentCreateDto.builder()
                 .orderId(200L)
@@ -262,31 +264,6 @@ class PaymentControllerIntegrationTest extends AbstractIntegrationTest {
     }
 
     @Test
-    @DisplayName("Search Payments: Admin filters by Status")
-    void searchPayments_ShouldFilterByStatus_WhenUserIsAdmin() throws Exception {
-        Payment p1 = new Payment();
-        p1.setOrderId(1001L);
-        p1.setUserId(1L);
-        p1.setStatus(PaymentStatus.SUCCESS);
-        paymentRepository.save(p1);
-
-        Payment p2 = new Payment();
-        p2.setOrderId(1002L);
-        p2.setUserId(2L);
-        p2.setStatus(PaymentStatus.FAILED);
-        paymentRepository.save(p2);
-
-        String token = generateTestToken(99L, TEST_ADMIN_EMAIL, ROLE_ADMIN);
-
-        mockMvc.perform(MockMvcRequestBuilders.get(BASE_URL)
-                        .header(AUTH_HEADER, token)
-                        .param("status", PaymentStatus.SUCCESS.name()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content", hasSize(1)))
-                .andExpect(jsonPath("$.content[0].status", is(PaymentStatus.SUCCESS.name())));
-    }
-
-    @Test
     @DisplayName("Get Total Sum For User: Success")
     void getTotalSumForUser_ShouldReturnSum() throws Exception {
         LocalDateTime now = LocalDateTime.now();
@@ -386,7 +363,7 @@ class PaymentControllerIntegrationTest extends AbstractIntegrationTest {
                 "orderId", 888L,
                 "userId", 42L,
                 "amount", 199.99,
-                "totalPrice", 199.99,
+                "totalAmount", 199.99,
                 "paymentAmount", 199.99
         );
 

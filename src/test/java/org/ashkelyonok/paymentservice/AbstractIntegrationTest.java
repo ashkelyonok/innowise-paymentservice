@@ -56,7 +56,7 @@ public abstract class AbstractIntegrationTest {
         registry.add("application.kafka.bootstrap-servers", KAFKA_CONTAINER::getBootstrapServers);
         registry.add("spring.kafka.consumer.auto-offset-reset", () -> "earliest");
 
-        registry.add("application.random-api-url", wireMockServer::baseUrl);
+        registry.add("random.api.url", wireMockServer::baseUrl);
     }
 
     protected String generateTestToken(Long userId, String email, String role) {
